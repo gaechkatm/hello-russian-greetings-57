@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Share, Play } from "lucide-react";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 
 // Import platform logos
 import SpotifyLogo from "/public/lovable-uploads/77e9518d-1cd7-4236-9010-d7387562db4f.png";
@@ -22,6 +23,8 @@ interface Release {
   links_by_platform: {
     [key: string]: { url: string; }
   };
+  description?: string | null;
+  og_description?: string | null;
 }
 
 const ALLOWED_PLATFORMS = {
@@ -95,13 +98,10 @@ export default function Release() {
             artist: data.artist || "Unknown Artist",
             cover_url: data.cover_url,
             redirect_url: data.redirect_url,
-            links_by_platform: links
+            links_by_platform: links,
+            description: data.description,
+            og_description: data.og_description
           });
-
-          // Update document title and meta tags
-          document.title = `${data.artist} - ${data.title}`;
-          // Update meta tags
-          updateMetaTags(data.title, data.artist, data.cover_url);
         }
       } catch (error) {
         console.error('Error fetching release:', error);
@@ -111,43 +111,19 @@ export default function Release() {
     }
 
     fetchRelease();
-
-    // Reset title when component unmounts
-    return () => {
-      document.title = "Music Label Multi-Links";
-    };
   }, [slug]);
 
-  // Function to update meta tags
-  const updateMetaTags = (title: string, artist: string, coverUrl: string) => {
-    // Update Open Graph meta tags
-    const metaTags = {
-      'og:title': `${artist} - ${title}`,
-      'og:description': `Слушай релиз "${title}" от ${artist} на любимой платформе`,
-      'og:image': coverUrl,
-      'og:type': 'music.song',
-      'twitter:card': 'summary_large_image',
-      'twitter:title': `${artist} - ${title}`,
-      'twitter:description': `Слушай релиз "${title}" от ${artist} на любимой платформе`,
-      'twitter:image': coverUrl,
-      'description': `Слушай релиз "${title}" от ${artist} на любимой платформе`
-    };
-
-    Object.entries(metaTags).forEach(([name, content]) => {
-      let element = document.querySelector(`meta[property="${name}"]`) || 
-                    document.querySelector(`meta[name="${name}"]`);
-      
-      if (!element) {
-        element = document.createElement('meta');
-        if (name.startsWith('og:')) {
-          element.setAttribute('property', name);
-        } else {
-          element.setAttribute('name', name);
-        }
-        document.head.appendChild(element);
-      }
-      element.setAttribute('content', content);
-    });
+  const getDescription = () => {
+    if (!release) return "Слушайте новые релизы на любимых музыкальных платформах";
+    
+    // Use custom OG description if available
+    if (release.og_description) return release.og_description;
+    
+    // Use regular description if available
+    if (release.description) return release.description;
+    
+    // Default description
+    return `Слушай релиз "${release.title}" от ${release.artist} на любимой платформе`;
   };
 
   const handleShare = async () => {
@@ -158,8 +134,8 @@ export default function Release() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: release.title,
-          text: `Слушай релиз "${release.title}" на любимой платформе`,
+          title: `${release.artist} - ${release.title}`,
+          text: getDescription(),
           url: currentUrl,
         });
       } catch (error) {
@@ -201,68 +177,88 @@ export default function Release() {
     .sort(([a], [b]) => a.localeCompare(b));
 
   return (
-    <div className="min-h-screen flex items-center justify-center w-full bg-background text-foreground p-4">
-      <div className="w-full max-w-md space-y-8 glass p-8 rounded-xl mx-auto">
-        <div className="flex flex-col items-center">
-          <div className="relative group perspective">
-            <img 
-              src={release.cover_url} 
-              alt={release.title}
-              className="w-64 h-64 rounded-xl shadow-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:rotate-[2deg]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl" />
+    <>
+      <Helmet>
+        <title>{`${release.artist} - ${release.title}`}</title>
+        <meta name="description" content={getDescription()} />
+        
+        {/* OpenGraph tags */}
+        <meta property="og:title" content={`${release.artist} - ${release.title}`} />
+        <meta property="og:description" content={getDescription()} />
+        <meta property="og:image" content={release.cover_url} />
+        <meta property="og:type" content="music.song" />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${release.artist} - ${release.title}`} />
+        <meta name="twitter:description" content={getDescription()} />
+        <meta name="twitter:image" content={release.cover_url} />
+      </Helmet>
+      
+      <div className="min-h-screen flex items-center justify-center w-full bg-background text-foreground p-4">
+        <div className="w-full max-w-md space-y-8 glass p-8 rounded-xl mx-auto">
+          <div className="flex flex-col items-center">
+            <div className="relative group perspective">
+              <img 
+                src={release.cover_url} 
+                alt={release.title}
+                className="w-64 h-64 rounded-xl shadow-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:rotate-[2deg]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl" />
+            </div>
+            
+            <div className="mt-6 text-center space-y-2">
+              <h1 className="text-2xl font-medium text-gradient">
+                {release.title}
+              </h1>
+              <p className="text-lg text-muted-foreground">{release.artist}</p>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mt-4 text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all duration-300" 
+              onClick={handleShare}
+            >
+              <Share className="w-5 h-5" />
+            </Button>
           </div>
-          
-          <div className="mt-6 text-center space-y-2">
-            <h1 className="text-2xl font-medium text-gradient">
-              {release.title}
-            </h1>
-            <p className="text-lg text-muted-foreground">{release.artist}</p>
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="mt-4 text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all duration-300" 
-            onClick={handleShare}
-          >
-            <Share className="w-5 h-5" />
-          </Button>
-        </div>
 
-        <div className="space-y-4 w-full">
-          {filteredLinks.map(([platform, { url }]) => {
-            const platformConfig = ALLOWED_PLATFORMS[platform as keyof typeof ALLOWED_PLATFORMS];
-            return (
-              <div 
-                key={platform}
-                className="flex items-center justify-between gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  {platformConfig.icon}
-                  <span className="text-sm text-muted-foreground">
-                    {platformConfig.name}
-                  </span>
-                </div>
-                <a 
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group"
+          <div className="space-y-4 w-full">
+            {filteredLinks.map(([platform, { url }]) => {
+              const platformConfig = ALLOWED_PLATFORMS[platform as keyof typeof ALLOWED_PLATFORMS];
+              return (
+                <div 
+                  key={platform}
+                  className="flex items-center justify-between gap-4"
                 >
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-secondary/50 hover:bg-secondary transition-all duration-300"
+                  <div className="flex items-center gap-2">
+                    {platformConfig.icon}
+                    <span className="text-sm text-muted-foreground">
+                      {platformConfig.name}
+                    </span>
+                  </div>
+                  <a 
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
                   >
-                    <Play className="w-4 h-4" />
-                  </Button>
-                </a>
-              </div>
-            );
-          })}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-secondary/50 hover:bg-secondary transition-all duration-300"
+                    >
+                      <Play className="w-4 h-4" />
+                    </Button>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import Release from "./pages/Release";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./contexts/AuthContext";
+import { HelmetProvider } from "react-helmet-async";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -25,53 +25,57 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <SidebarProvider>
-            <Routes>
-              <Route
-                path="/auth"
-                element={<Auth />}
-              />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <div className="flex w-full">
-                      <AppSidebar />
-                      <div className="flex-1 p-6">
-                        <Links />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/submit"
-                element={
-                  <ProtectedRoute>
-                    <div className="flex w-full">
-                      <AppSidebar />
-                      <div className="flex-1 p-6">
-                        <Submit />
-                      </div>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/:slug" element={<Release />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SidebarProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SidebarProvider>
+                <Routes>
+                  <Route
+                    path="/auth"
+                    element={<Auth />}
+                  />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <div className="flex w-full">
+                          <AppSidebar />
+                          <div className="flex-1 p-6">
+                            <Links />
+                          </div>
+                        </div>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/submit"
+                    element={
+                      <ProtectedRoute>
+                        <div className="flex w-full">
+                          <AppSidebar />
+                          <div className="flex-1 p-6">
+                            <Submit />
+                          </div>
+                        </div>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/:slug" element={<Release />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </SidebarProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  );
+}
 
 export default App;
