@@ -125,6 +125,8 @@ export default function Release() {
       'og:title': `${artist} - ${title}`,
       'og:description': `Слушай релиз "${title}" от ${artist} на любимой платформе`,
       'og:image': coverUrl,
+      'og:type': 'music.song',
+      'twitter:card': 'summary_large_image',
       'twitter:title': `${artist} - ${title}`,
       'twitter:description': `Слушай релиз "${title}" от ${artist} на любимой платформе`,
       'twitter:image': coverUrl,

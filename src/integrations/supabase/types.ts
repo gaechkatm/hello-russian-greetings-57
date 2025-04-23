@@ -32,8 +32,10 @@ export type Database = {
           artist: string
           cover_url: string
           created_at: string
+          description: string | null
           id: string
           links_by_platform: Json
+          og_description: string | null
           redirect_url: string | null
           slug: string
           spotify_url: string
@@ -43,8 +45,10 @@ export type Database = {
           artist: string
           cover_url: string
           created_at?: string
+          description?: string | null
           id?: string
           links_by_platform: Json
+          og_description?: string | null
           redirect_url?: string | null
           slug: string
           spotify_url: string
@@ -54,8 +58,10 @@ export type Database = {
           artist?: string
           cover_url?: string
           created_at?: string
+          description?: string | null
           id?: string
           links_by_platform?: Json
+          og_description?: string | null
           redirect_url?: string | null
           slug?: string
           spotify_url?: string
