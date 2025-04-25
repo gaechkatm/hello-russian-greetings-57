@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +6,7 @@ import { Share, Play } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 import { PreSaveButton } from "@/components/PreSaveButton";
+import type { Release as ReleaseType } from "@/types/release";
 
 // Import platform logos
 import SpotifyLogo from "/public/lovable-uploads/77e9518d-1cd7-4236-9010-d7387562db4f.png";
@@ -15,19 +15,6 @@ import YoutubeMusicLogo from "/public/lovable-uploads/06bc136f-5266-4959-be9f-50
 import SoundCloudLogo from "/public/lovable-uploads/585f5bc7-7945-4c00-9aa7-c771b7ab2d8d.png";
 import YandexLogo from "/public/lovable-uploads/fb0190c9-a778-48b7-a175-1fc791cb16a8.png";
 import VKMusicLogo from "/public/lovable-uploads/c2513543-25d6-4eea-b7c6-c4e530cfd711.png";
-
-interface Release {
-  title: string;
-  artist: string;
-  cover_url: string;
-  redirect_url: string | null;
-  links_by_platform: {
-    [key: string]: { url: string; }
-  };
-  description?: string | null;
-  og_description?: string | null;
-  upc?: string;
-}
 
 const ALLOWED_PLATFORMS = {
   spotify: {
@@ -59,7 +46,7 @@ const ALLOWED_PLATFORMS = {
 export default function Release() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [release, setRelease] = useState<Release | null>(null);
+  const [release, setRelease] = useState<ReleaseType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -155,7 +142,7 @@ export default function Release() {
     }
   };
 
-  const showPresaveButton = (release: Release) => {
+  const showPresaveButton = (release: ReleaseType) => {
     // Show presave button only if spotify link is not available
     return !release.links_by_platform?.spotify;
   };
