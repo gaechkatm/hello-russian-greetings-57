@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Share, Play } from "lucide-react";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
+import { PreSaveButton } from "@/components/PreSaveButton";
 
 // Import platform logos
 import SpotifyLogo from "/public/lovable-uploads/77e9518d-1cd7-4236-9010-d7387562db4f.png";
@@ -101,7 +103,7 @@ export default function Release() {
             links_by_platform: links,
             description: data.description,
             og_description: data.og_description,
-            upc: data.upc
+            upc: data.upc // Add the UPC field here
           });
         }
       } catch (error) {
@@ -232,7 +234,7 @@ export default function Release() {
           </div>
 
           <div className="space-y-4 w-full">
-            {showPresaveButton(release) && (
+            {showPresaveButton(release) && release.upc && (
               <PreSaveButton upc={release.upc} />
             )}
             
