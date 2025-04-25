@@ -87,10 +87,10 @@ export default function Release() {
             artist: data.artist || "Unknown Artist",
             cover_url: data.cover_url,
             redirect_url: data.redirect_url,
-            links_by_platform: links,
+            links_by_platform: links || {},
             description: data.description,
             og_description: data.og_description,
-            upc: data.upc // Add the UPC field here
+            upc: data.upc
           });
         }
       } catch (error) {
@@ -167,7 +167,7 @@ export default function Release() {
     );
   }
 
-  const filteredLinks = Object.entries(release.links_by_platform)
+  const filteredLinks = Object.entries(release.links_by_platform || {})
     .filter(([platform]) => platform in ALLOWED_PLATFORMS)
     .sort(([a], [b]) => a.localeCompare(b));
 
@@ -221,12 +221,18 @@ export default function Release() {
           </div>
 
           <div className="space-y-4 w-full">
-            {showPresaveButton(release) && release.upc && (
+            {release.upc && showPresaveButton(release) && (
               <PreSaveButton upc={release.upc} />
             )}
             
-            {filteredLinks.map(([platform, { url }]) => {
+            {filteredLinks.map(([platform, linkData]) => {
+              if (!linkData || typeof linkData !== 'object' || !('url' in linkData)) {
+                return null; // Skip invalid link data
+              }
+              
               const platformConfig = ALLOWED_PLATFORMS[platform as keyof typeof ALLOWED_PLATFORMS];
+              if (!platformConfig) return null;
+              
               return (
                 <div 
                   key={platform}
@@ -239,7 +245,7 @@ export default function Release() {
                     </span>
                   </div>
                   <a 
-                    href={url}
+                    href={linkData.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group"

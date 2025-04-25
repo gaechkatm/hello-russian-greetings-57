@@ -1,5 +1,5 @@
 
-interface Release {
+export interface Release {
   title: string;
   artist: string;
   cover_url: string;
