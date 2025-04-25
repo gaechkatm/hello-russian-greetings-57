@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +24,7 @@ interface Release {
   };
   description?: string | null;
   og_description?: string | null;
+  upc?: string;
 }
 
 const ALLOWED_PLATFORMS = {
@@ -100,7 +100,8 @@ export default function Release() {
             redirect_url: data.redirect_url,
             links_by_platform: links,
             description: data.description,
-            og_description: data.og_description
+            og_description: data.og_description,
+            upc: data.upc
           });
         }
       } catch (error) {
@@ -150,6 +151,11 @@ export default function Release() {
         toast.error("Не удалось скопировать ссылку");
       }
     }
+  };
+
+  const showPresaveButton = (release: Release) => {
+    // Show presave button only if spotify link is not available
+    return !release.links_by_platform?.spotify;
   };
 
   if (isLoading) {
@@ -226,6 +232,10 @@ export default function Release() {
           </div>
 
           <div className="space-y-4 w-full">
+            {showPresaveButton(release) && (
+              <PreSaveButton upc={release.upc} />
+            )}
+            
             {filteredLinks.map(([platform, { url }]) => {
               const platformConfig = ALLOWED_PLATFORMS[platform as keyof typeof ALLOWED_PLATFORMS];
               return (
