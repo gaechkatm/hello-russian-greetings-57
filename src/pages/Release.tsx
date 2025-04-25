@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,6 +83,10 @@ export default function Release() {
             ? JSON.parse(data.links_by_platform) 
             : data.links_by_platform;
 
+          // Cast the data to include the upc field since we know it exists in our database
+          // but TypeScript doesn't recognize it from the type definition
+          const releaseData = data as any;
+          
           setRelease({
             title: data.title,
             artist: data.artist || "Unknown Artist",
@@ -90,7 +95,7 @@ export default function Release() {
             links_by_platform: links || {},
             description: data.description,
             og_description: data.og_description,
-            upc: data.upc
+            upc: releaseData.upc
           });
         }
       } catch (error) {

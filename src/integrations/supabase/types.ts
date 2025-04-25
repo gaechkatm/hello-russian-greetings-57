@@ -61,6 +61,7 @@ export type Database = {
           slug: string
           spotify_url: string
           title: string
+          upc: string | null
         }
         Insert: {
           artist: string
@@ -74,6 +75,7 @@ export type Database = {
           slug: string
           spotify_url: string
           title: string
+          upc?: string | null
         }
         Update: {
           artist?: string
@@ -87,6 +89,7 @@ export type Database = {
           slug?: string
           spotify_url?: string
           title?: string
+          upc?: string | null
         }
         Relationships: []
       }
