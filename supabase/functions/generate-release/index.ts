@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0';
 import { slugify } from 'https://deno.land/x/slugify@0.3.0/mod.ts';
 
@@ -126,12 +127,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { spotifyUrl, upc, platforms } = await req.json();
+    const { spotifyUrl, upc, platforms, title, artist } = await req.json();
     
-    console.log('Processing request:', { spotifyUrl, upc, platforms });
+    console.log('Processing request:', { spotifyUrl, upc, platforms, title, artist });
     
-    let title = "Неизвестный релиз";
-    let artist = "Неизвестный артист";
+    let finalTitle = title || "Неизвестный релиз";
+    let finalArtist = artist || "Неизвестный артист";
     let coverUrl = "https://pjkqcvuqzceepanbzpyx.supabase.co/storage/v1/object/public/releases/placeholder.jpg";
     let finalSpotifyUrl = spotifyUrl || "";
     let spotifyDetails = null;
@@ -157,15 +158,15 @@ Deno.serve(async (req) => {
       }
 
       if (spotifyDetails) {
-        title = spotifyDetails.title;
-        artist = spotifyDetails.artist;
+        finalTitle = spotifyDetails.title;
+        finalArtist = spotifyDetails.artist;
         coverUrl = spotifyDetails.coverUrl;
         finalSpotifyUrl = spotifyDetails.spotifyUrl;
       }
     }
     
-    const slug = title !== "Неизвестный релиз" 
-      ? slugify(title)
+    const slug = finalTitle !== "Неизвестный релиз" 
+      ? slugify(finalTitle)
       : `release-${Date.now()}`;
     
     const linksByPlatform: Record<string, { url: string }> = {};
@@ -209,11 +210,12 @@ Deno.serve(async (req) => {
       .from('releases')
       .insert({
         slug,
-        title,
-        artist,
+        title: finalTitle,
+        artist: finalArtist,
         cover_url: coverUrl,
         spotify_url: finalSpotifyUrl,
-        links_by_platform: linksByPlatform
+        links_by_platform: linksByPlatform,
+        upc: upc || null
       });
 
     if (dbError) throw dbError;

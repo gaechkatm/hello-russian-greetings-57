@@ -9,5 +9,5 @@ export interface Release {
   };
   description?: string | null;
   og_description?: string | null;
-  upc?: string;
+  upc?: string | null;
 }

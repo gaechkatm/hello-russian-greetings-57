@@ -17,6 +17,9 @@ export default function Submit() {
     yandex: false,
     soundcloud: false
   });
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const validateInput = (value: string) => {
     if (value.includes('spotify.com/')) {
@@ -42,6 +45,8 @@ export default function Submit() {
       
       const requestBody = {
         ...(isSpotifyUrl ? { spotifyUrl: input } : { upc: input }),
+        title: title || undefined,
+        artist: artist || undefined,
         platforms: {
           spotify: true, // Always included
           appleMusic: true, // Always included
@@ -90,6 +95,43 @@ export default function Submit() {
               Примеры: https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT или 0888880123456
             </p>
           </div>
+
+          <Button 
+            type="button" 
+            variant="ghost" 
+            className="w-full py-2 border border-dashed"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+          >
+            {showAdvanced ? "Скрыть дополнительные настройки" : "Показать дополнительные настройки"}
+          </Button>
+
+          {showAdvanced && (
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="title">Название релиза (опционально)</Label>
+                <Input
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Название релиза"
+                  className="w-full bg-secondary/50 border-secondary"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="artist">Имя артиста (опционально)</Label>
+                <Input
+                  id="artist"
+                  type="text"
+                  value={artist}
+                  onChange={(e) => setArtist(e.target.value)}
+                  placeholder="Имя артиста"
+                  className="w-full bg-secondary/50 border-secondary"
+                />
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Дополнительные платформы:</p>
